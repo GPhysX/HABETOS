@@ -3,8 +3,8 @@
 
 #include <stdint.h>
 
-// Include the local copy of the SoftSPI library
-#include "../SoftSPI/SoftSPI.h"
+// Include the SoftSPI library
+#include <SoftSPI.h>
 
 
 /**
@@ -82,7 +82,7 @@ private:
 	uint8_t cs;
 
 	// The ChipKit software SPI library which will be used for this sensor
-	SoftSPI spibus;
+	SoftSPI *spibus;
 
 	// Union to assist in the easy reading of the data from teh sensor
 	union channelDataWriter {

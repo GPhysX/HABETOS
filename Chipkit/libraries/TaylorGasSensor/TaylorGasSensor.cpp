@@ -1,11 +1,13 @@
-#include "../SoftSPI/SoftSPI.h"
+//#include "../SoftSPI/SoftSPI.h"
 
-#include "TaylorGasSensor.h"
+#include <TaylorGasSensor.h>
 
 /**
 * Create the sensor object and initialize the hardware interface
 */
 TaylorGasSensor::TaylorGasSensor(uint8_t csPin, uint8_t mosiPin, uint8_t misoPin, uint8_t sckPin) {
+	this->spibus = new SoftSPI();
+
 	// Store the pin information in local variables
 	this->cs = csPin;
 	this->mosi = mosiPin;
@@ -16,10 +18,10 @@ TaylorGasSensor::TaylorGasSensor(uint8_t csPin, uint8_t mosiPin, uint8_t misoPin
 	pinMode(8, OUTPUT);
 
 	// Initialize the SPI bus
-	this->spibus.begin(this->cs, this->mosi, this->miso, this->sck);
-	this->spibus.setSpeed(2500000);						// Run the bus at 250kHz
-	this->spibus.setDirection(SSPI_SHIFT_LEFT);			// Shift out the most significant bit first
-	this->spibus.setMode(SSPI_MODE1);					// Have idle low SCK and data on rising clock edge
+	this->spibus->begin(this->cs, this->mosi, this->miso, this->sck);
+	this->spibus->setSpeed(2500000);						// Run the bus at 250kHz
+	this->spibus->setDirection(SSPI_SHIFT_LEFT);			// Shift out the most significant bit first
+	this->spibus->setMode(SSPI_MODE1);					// Have idle low SCK and data on rising clock edge
 }
 
 
@@ -65,17 +67,17 @@ uint16_t TaylorGasSensor::readChannel(channelNumbers channelNumber) {
 	transmitBuffer[1] = channelNumber;
 
 	// Pull down the CS pin to activate the sensor comms lines
-	this->spibus.setSelect(0);
+	this->spibus->setSelect(0);
 
 	// Send the number of the desired data channel to the sensor
-	this->spibus.transfer(2, transmitBuffer, receiveBuffer);
+	this->spibus->transfer(2, transmitBuffer, receiveBuffer);
 
 	// Receive the two byte response with the channel data, write 0x00 to it as
 	// a garbage channel
-	this->spibus.transfer(2, (uint8_t) 0x00, receiveBuffer);
+	this->spibus->transfer(2, (uint8_t) 0x00, receiveBuffer);
 
 	// Set CS pin to high to disable sensor comms lines
-	this->spibus.setSelect(1);
+	this->spibus->setSelect(1);
 
 	// Get rid of the channel number from the 1st 4 bits
 	receivedData &= (receiveBuffer[1]<<8);
