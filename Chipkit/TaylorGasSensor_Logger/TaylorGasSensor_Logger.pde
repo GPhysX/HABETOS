@@ -1,7 +1,8 @@
 #include <SD.h>
+#include <SoftSPI.h>
+#include <TaylorGasSensor.h>
 
-#include "TaylorGasSensor.h"
-
+// The pins the sensor is on
 #define CS_PIN		3
 #define SCK_PIN		2
 #define MOSI_PIN	6
@@ -17,5 +18,5 @@ void setup() {
 }
 
 void loop() {
-	
+	Serial.println("Hello");
 }
