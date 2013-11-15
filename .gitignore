@@ -1,0 +1,3 @@
+# Ignore the temporary files for text editors
+*~
+*.swp
