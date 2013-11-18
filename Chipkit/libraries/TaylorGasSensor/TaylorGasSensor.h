@@ -33,7 +33,7 @@ public:
 	 * Enumerated list of all the channel numbers for the sensor
 	 */
 	enum channelNumbers {
-		CHANNEL_0,
+		CHANNEL_0 = 0,
 		CHANNEL_1,
 		CHANNEL_2,
 		CHANNEL_3,
@@ -89,6 +89,15 @@ private:
 		uint16_t array[8];
 		channelData_t structure;
 	};
+
+
+	/**
+	 * Read a specific data channel
+	 *
+	 * @param The channel number (0-7)
+	 * @return The 12 bit value from the channel ADC
+	 */
+	uint16_t readChannelNumber(uint8_t channelNumber);
 
 
 };

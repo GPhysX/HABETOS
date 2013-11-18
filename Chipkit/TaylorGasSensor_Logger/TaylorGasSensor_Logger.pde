@@ -3,7 +3,11 @@
 #include <TaylorGasSensor.h>
 
 // The CS pin for the SD card
-#define SD_CS_PIN	10
+#define SD_CS_PIN	8
+#define SD_DEFAULT_CS_PIN	10
+
+// The LED pin
+#define LED_PIN		13
 
 // The pins the sensor is on
 #define CS_PIN		3
@@ -22,6 +26,7 @@ File dataFile;
 
 void setup() {
 	Serial.begin(9600);
+	pinMode(LED_PIN, OUTPUT);
 
 	Serial.print("Initializing Gas Sensor...");
 	gasSensor = new TaylorGasSensor(CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN);
@@ -30,12 +35,16 @@ void setup() {
 	Serial.print("Initializing SD Card...");
 	// Set the CS pin to be an output
 	pinMode(SD_CS_PIN, OUTPUT);
+	digitalWrite(SD_CS_PIN, HIGH);
+
+	pinMode(SD_DEFAULT_CS_PIN, OUTPUT);
+	digitalWrite(SD_DEFAULT_CS_PIN, HIGH);
 
 	// Start the SD card
 	if (!SD.begin(SD_CS_PIN)) {
 		// The card is not present
 		Serial.print("\n\r");
-		Serial.print("Error: No SD Card Detected");
+		Serial.print("Error: No SD Card Detected\n\r");
 		return;
 	}
 	Serial.print("Completed\n\r");
@@ -61,30 +70,54 @@ void loop() {
 	TaylorGasSensor::channelData_t allData;
 
 	Serial.print("Taking a reading...");
+	digitalWrite(LED_PIN, HIGH);
+
 	// Read the data from all channels of the sensor
 	allData = gasSensor->readAllData();
 
 	// Store the data on the memory card in a comma-delimited manner
-	dataFile.print(allData.temperature);
-	dataFile.print(",");
-	dataFile.print(allData.channel0);
-	dataFile.print(",");
-	dataFile.print(allData.channel1);
-	dataFile.print(",");
-	dataFile.print(allData.channel2);
-	dataFile.print(",");
-	dataFile.print(allData.channel3);
-	dataFile.print(",");
-	dataFile.print(allData.channel4);
-	dataFile.print(",");
-	dataFile.print(allData.channel5);
-	dataFile.print(",");
-	dataFile.print(allData.channel6);
-	dataFile.print(",");
-	dataFile.print(allData.channel7);
-	dataFile.print("\n");
+//	dataFile.print(allData.temperature);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel0);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel1);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel2);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel3);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel4);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel5);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel6);
+//	dataFile.print(",");
+//	dataFile.print(allData.channel7);
+//	dataFile.print("\n");
+
+	Serial.print("\n\r");
+	Serial.print(allData.temperature);
+	Serial.print(",");
+	Serial.print(allData.channel0);
+	Serial.print(",");
+	Serial.print(allData.channel1);
+	Serial.print(",");
+	Serial.print(allData.channel2);
+	Serial.print(",");
+	Serial.print(allData.channel3);
+	Serial.print(",");
+	Serial.print(allData.channel4);
+	Serial.print(",");
+	Serial.print(allData.channel5);
+	Serial.print(",");
+	Serial.print(allData.channel6);
+	Serial.print(",");
+	Serial.print(allData.channel7);
+	Serial.print("\n");
 
 	Serial.print("Completed\n\r");
+	digitalWrite(LED_PIN, LOW);
+
 	// Delay for 1 second before performing the next reading
 	delay(1000);
 }

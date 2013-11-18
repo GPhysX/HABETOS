@@ -39,7 +39,7 @@ TaylorGasSensor::channelData_t TaylorGasSensor::readAllData() {
 	
 	// Loop over every ADC channel in the sensor and read it
 	for (i=0; i<9; i++) {
-		data.array[i] = this->readChannel((TaylorGasSensor::channelNumbers) i);
+		data.array[i] = this->readChannelNumber(i);
 	}
 
 	// Return the populated data structure
@@ -58,9 +58,10 @@ uint16_t TaylorGasSensor::readChannel(channelNumbers channelNumber) {
 	// SPI communication buffers
 	uint8_t	receiveBuffer[2];
 	uint8_t transmitBuffer[2];
+	uint8_t garbageBuffer[2];
 
 	// Populate with a mask used to remove the channel number
-	uint16_t receivedData = 0xF000;
+	uint16_t receivedData = 0xFFFF;
 
 	// Populate the transmit buffer with the appropriate frame
 	transmitBuffer[0] = 0x04;
@@ -70,7 +71,7 @@ uint16_t TaylorGasSensor::readChannel(channelNumbers channelNumber) {
 	this->spibus->setSelect(0);
 
 	// Send the number of the desired data channel to the sensor
-	this->spibus->transfer(2, transmitBuffer, receiveBuffer);
+	this->spibus->transfer(2, transmitBuffer, garbageBuffer);
 
 	// Receive the two byte response with the channel data, write 0x00 to it as
 	// a garbage channel
@@ -80,12 +81,54 @@ uint16_t TaylorGasSensor::readChannel(channelNumbers channelNumber) {
 	this->spibus->setSelect(1);
 
 	// Get rid of the channel number from the 1st 4 bits
-	receivedData &= (receiveBuffer[1]<<8);
-	receivedData &= receiveBuffer[0];
-
+	receivedData = (receiveBuffer[0]<<8);
+	receivedData |= receiveBuffer[1];
+	Serial.println(receivedData, HEX);
 	return(receivedData);
 }
 
+uint16_t TaylorGasSensor::readChannelNumber(uint8_t channelNumber) {
+	// SPI communication buffers
+	uint8_t	receiveBuffer[2];
+	uint8_t transmitBuffer[2];
+	uint8_t garbageBuffer[2];
+
+	// Populate with a mask used to remove the channel number
+	uint16_t receivedData;
+
+	// Populate the transmit buffer with the appropriate frame
+	transmitBuffer[0] = 0x04;
+	transmitBuffer[1] = channelNumber;
+	Serial.println(transmitBuffer[0], HEX);
+	Serial.println(transmitBuffer[1], HEX);
+
+	// Pull down the CS pin to activate the sensor comms lines
+	this->spibus->setSelect(0);
+
+	// Send the number of the desired data channel to the sensor
+	//this->spibus->transfer(2, transmitBuffer, garbageBuffer);
+	this->spibus->transfer(1, (uint8_t) 0x04, garbageBuffer);
+	this->spibus->transfer(1, channelNumber, garbageBuffer);
+
+	// Toggle the CS line
+	this->spibus->setSelect(1);
+	delay(10);
+	this->spibus->setSelect(0);
+
+	// Receive the two byte response with the channel data, write 0x00 to it as
+	// a garbage channel
+	this->spibus->transfer(2, (uint8_t) 0x00, receiveBuffer);
+
+	// Set CS pin to high to disable sensor comms lines
+	this->spibus->setSelect(1);
+
+	// Get rid of the channel number from the 1st 4 bits
+	receivedData = (receiveBuffer[0]<<8);
+	receivedData |= receiveBuffer[1];
+	Serial.println(receiveBuffer[0], HEX);
+	Serial.println(receiveBuffer[1], HEX);
+	return(receivedData);
+}
 
 
 /**
