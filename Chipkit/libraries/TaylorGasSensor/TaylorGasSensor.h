@@ -34,14 +34,14 @@ public:
 	 */
 	enum channelNumbers {
 		CHANNEL_0 = 0,
-		CHANNEL_1,
-		CHANNEL_2,
-		CHANNEL_3,
-		CHANNEL_4,
-		CHANNEL_5,
-		CHANNEL_6,
-		CHANNEL_7,
-		TEMPERATURE
+		CHANNEL_1 = 1,
+		CHANNEL_2 = 2,
+		CHANNEL_3 = 3,
+		CHANNEL_4 = 4,
+		CHANNEL_5 = 5,
+		CHANNEL_6 = 6,
+		CHANNEL_7 = 7,
+		TEMPERATURE = 8
 	};
 	
 	/**
@@ -84,22 +84,11 @@ private:
 	// The ChipKit software SPI library which will be used for this sensor
 	SoftSPI *spibus;
 
-	// Union to assist in the easy reading of the data from teh sensor
+	// Union to assist in the easy reading of the data from the sensor
 	union channelDataWriter {
 		uint16_t array[8];
 		channelData_t structure;
 	};
-
-
-	/**
-	 * Read a specific data channel
-	 *
-	 * @param The channel number (0-7)
-	 * @return The 12 bit value from the channel ADC
-	 */
-	uint16_t readChannelNumber(uint8_t channelNumber);
-
-
 };
 
 #endif
