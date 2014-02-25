@@ -1,4 +1,5 @@
 #include <SD.h>
+#include <lea6.h>
 #include <SoftSPI.h>
 #include <TaylorGasSensor.h>
 
@@ -18,6 +19,9 @@
 // The filename of the datafile
 #define FILE_NAME "data.csv"
 
+// The GPS object
+LEA6 *gps;
+
 // The gas sensor object
 TaylorGasSensor *gasSensor;
 
@@ -25,14 +29,20 @@ TaylorGasSensor *gasSensor;
 File dataFile;
 
 void setup() {
-	Serial.begin(9600);
+	// Configure the serial port and the LED
+//	Serial.begin(9600);
 	pinMode(LED_PIN, OUTPUT);
 
-	Serial.print("Initializing Gas Sensor...");
+	// Initialize the GPS
+	gps = new LEA6(&Serial);
+	gps->init();
+	
+//	Serial.print("Initializing Gas Sensor...");
 	gasSensor = new TaylorGasSensor(CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN);
-	Serial.print("Completed\n\r");
+//	Serial.print("Completed\n\r");
 
-	Serial.print("Initializing SD Card...");
+//	Serial.print("Initializing SD Card...");
+
 	// Set the CS pin to be an output
 	pinMode(SD_CS_PIN, OUTPUT);
 	digitalWrite(SD_CS_PIN, HIGH);
@@ -47,10 +57,10 @@ void setup() {
 		Serial.print("Error: No SD Card Detected\n\r");
 		return;
 	}
-	Serial.print("Completed\n\r");
+//	Serial.print("Completed\n\r");
 
 	// Open the file to write the data to
-	Serial.print("Opening the data file...");
+//	Serial.print("Opening the data file...");
 	dataFile = SD.open(FILE_NAME, FILE_WRITE);
 	if (!dataFile) {
 		// Error opening the file
@@ -59,12 +69,12 @@ void setup() {
 		Serial.print(FILE_NAME);
 		return;
 	}
-	Serial.print("Opened ");
-	Serial.print(FILE_NAME);
-	Serial.print("\n\r");
+//	Serial.print("Opened ");
+//	Serial.print(FILE_NAME);
+//	Serial.print("\n\r");
 
 	// Print headers into the file
-	dataFile.print("Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
+	dataFile.print("Time, Lat, Long, Alt, Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
 
 	// Close the file to write the data to it
 	dataFile.close();
@@ -74,7 +84,15 @@ void loop() {
 	// The data structure to hold all of the channel data
 	TaylorGasSensor::channelData_t allData;
 
-	Serial.print("Taking a reading...");
+	// The data structure to hold the GPS data
+	LEA6::ubloxData_t gpsData;
+
+	// Wait for the GPS to provide data
+	while (!(gps->readGPS())) {
+	}
+	gpsData = gps->getPositionInfo();
+
+//	Serial.print("Taking a reading...");
 
 	// Toggle the LED to indicate the read is in progress
 	digitalWrite(LED_PIN, HIGH);
@@ -87,6 +105,14 @@ void loop() {
 	
 	// If the log file exists, write the data to it
 	if (dataFile) {
+		dataFile.print(gpsData.time);
+		dataFile.print(",");
+		dataFile.print(gpsData.latitude);
+		dataFile.print(",");
+		dataFile.print(gpsData.longitude);
+		dataFile.print(",");
+		dataFile.print(gpsData.altitude);
+		dataFile.print(",");
 		dataFile.print(allData.temperature);
 		dataFile.print(",");
 		dataFile.print(allData.channel0);
@@ -111,7 +137,7 @@ void loop() {
 	}
 
 	// Print the data to the computer terminal as well
-	Serial.print("\n\r");
+/*	Serial.print("\n\r");
 	Serial.print(allData.temperature);
 	Serial.print(",");
 	Serial.print(allData.channel0);
@@ -132,10 +158,10 @@ void loop() {
 	Serial.print("\n");
 
 	Serial.print("Completed\n\r");
-
+*/
 	// Toggle the LED to indicate the read is finished
 	digitalWrite(LED_PIN, LOW);
 
 	// Delay for 1 second before performing the next reading
-	delay(1000);
+//	delay(1000);
 }
