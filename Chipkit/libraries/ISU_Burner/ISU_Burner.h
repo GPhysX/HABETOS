@@ -50,6 +50,8 @@ public:
 	 */
 	void sendMessage(char *messageBuf, short length);
 
+
+	void writeLogicLevel(uint8_t logicLevel);
 private:
 	short A_pinNum;
 	short B_pinNum;
@@ -59,7 +61,7 @@ private:
 	 *
 	 * @param logicLevel The logic level to transmit
 	 */
-	void writeLogicLevel(uint8_t logicLevel);
+//	void writeLogicLevel(uint8_t logicLevel);
 };
 
 #endif
