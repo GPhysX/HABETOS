@@ -25,7 +25,7 @@ void setup(void) {
 	gps->init();
 
 	// Prepare the serial port for the telemetry transmitter
-	Serial.begin(57600);
+	Serial.begin(9600);
 	hardSerial = &Serial;
 
 	// Create the three burners
@@ -33,7 +33,7 @@ void setup(void) {
 	burner1 = new ISU_Burner(7, 8);
 	burner2 = new ISU_Burner(9, 10);
 	burner3 = new ISU_Burner(11, 12);
-	Serial.print("Completed");
+	Serial.print("Completed\n\r");
 }
 
 
@@ -43,7 +43,7 @@ void loop(void) {
 	char comm_data[2];
 	
 	// Read the telemetry serial port and have it decipher the command
-	if (Serial.available() > 1) {
+	while ( Serial.available() > 0 ) {
 		comm_data[0] = Serial.read();
 		comm_data[1] = 0;
 		commands_interpret(comm_data);

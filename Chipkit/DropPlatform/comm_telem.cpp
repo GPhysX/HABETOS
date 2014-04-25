@@ -16,10 +16,12 @@ void comm_telem( char* args ) {
 	case 0:
 		// Disable the telemtry
 		hardSerial->println("Disabling Telemetry");
+		telemEnable = 0;
 		break;
 	case 1:
 		// Enable the telemetry
 		hardSerial->println("Enabling Telemetry");
+		telemEnable = 1;
 		break;
 	default:
 		// Do nothing if the command is not recognized

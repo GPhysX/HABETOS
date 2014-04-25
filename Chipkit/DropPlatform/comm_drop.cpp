@@ -12,7 +12,9 @@ extern ISU_Burner *burner2;
 extern ISU_Burner *burner3;
 
 void comm_drop( char* args ){
+	uint8_t burnTime = atoi(args);
 	hardSerial->println("Dropping Plane");
+
 	// Start the burn
 	burner1->writeLogicLevel(1);
 	burner2->writeLogicLevel(1);
@@ -20,7 +22,11 @@ void comm_drop( char* args ){
 	digitalWrite(13, 1);
 
 	// Wait for the burn time
-	delay(5000);
+	for (int i=burnTime; i > 0; i--) {
+		hardSerial->print(i);
+		hardSerial->print("\n\r");
+		delay(1000);
+	}
 
 	// Stop the burn
 	burner1->writeLogicLevel(0);
