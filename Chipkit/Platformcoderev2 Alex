@@ -1,0 +1,66 @@
+#include <Cmd.h>
+#include <lea6.h>
+LEA6* gps;
+
+
+void setup()
+{
+ pinMode(2,OUTPUT);
+ //avoid premature firing
+ digitalWrite(2,LOW);
+ // create gps object
+ gps=new LEA6(&Serial1);
+ gps->init();
+ //initialize and create commands
+ cmdInit (9600);
+ cmdAdd("on",on);
+ cmdAdd("off",off);
+ cmdAdd("fire",fire);
+ Serial.println("powered up");
+ unsigned long ptime=0;
+
+
+}
+void loop()
+{
+  int ct=5000;
+  unsigned long time=millis();
+  unsigned long ptime;
+  LEA6::ubloxData_t gpsData;//creates gpsData variable;
+  cmdPoll();
+  gpsData = gps->getPositionInfo();
+  if (time-ptime>=ct)
+  {
+     Serial.print(gpsData.time);
+     Serial.print(",");
+     Serial.print(gpsData.latitude);
+     Serial.print(",");
+     Serial.print(gpsData.longitude);
+     Serial.print(",");
+     Serial.print(gpsData.altitude);
+     Serial.print(",");
+     Serial.print(gpsData.satellites);
+     Serial.print("\n\r");
+     ptime=time;
+     Serial.print(ptime);
+  }
+}
+void off(int arg_cnt, char **args)
+{
+  digitalWrite(2,LOW);
+  Serial.println("Pin Low");
+}
+void on(int arg_cnt, char **args)
+{
+  Serial.println("Pin High");
+  digitalWrite(2,HIGH);
+  
+}
+void fire(int arg_cnt, char **args)
+{
+  Serial.println("firing");
+  digitalWrite(2,HIGH);
+  delay(500);
+  Serial.println("firing complete");
+  digitalWrite(2,LOW);
+}
