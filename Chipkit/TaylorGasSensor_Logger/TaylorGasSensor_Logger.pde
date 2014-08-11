@@ -7,8 +7,12 @@
 #define SD_CS_PIN	8
 #define SD_DEFAULT_CS_PIN	10
 
+//Define a Debug mode, comment out this line if you wish to turn debug off
+//#define DEBUG
+
 // The LED pin
 #define LED_PIN		13
+#define ERR_PIN         43
 
 // The pins the sensor is on
 #define CS_PIN		3
@@ -17,7 +21,7 @@
 #define MISO_PIN	5
 
 // The filename of the datafile
-#define FILE_NAME "data.csv"
+//#define FILE_NAME "data.csv"
 
 // The GPS object
 LEA6 *gps;
@@ -27,21 +31,34 @@ TaylorGasSensor *gasSensor;
 
 // The data file object
 File dataFile;
+char filename[] = "LOGGER00.CSV";
 
 void setup() {
 	// Configure the serial port and the LED
-//	Serial.begin(9600);
+        #ifdef DEBUG
+	Serial.begin(9600);
+        #endif
 	pinMode(LED_PIN, OUTPUT);
+        pinMode(ERR_PIN, OUTPUT);
+        //Test Error LED
+        digitalWrite(ERR_PIN,HIGH);
+        delay(500);
+        digitalWrite(ERR_PIN,LOW);
+        delay(500);
+        digitalWrite(ERR_PIN,HIGH);
+        delay(500);
+        
+        digitalWrite(ERR_PIN, LOW);
 
 	// Initialize the GPS
 	gps = new LEA6(&Serial);
 	gps->init();
 	
-//	Serial.print("Initializing Gas Sensor...");
+	Serial.print("Initializing Gas Sensor...");
 	gasSensor = new TaylorGasSensor(CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN);
-//	Serial.print("Completed\n\r");
+	Serial.print("Completed\n\r");
 
-//	Serial.print("Initializing SD Card...");
+	Serial.print("Initializing SD Card...");
 
 	// Set the CS pin to be an output
 	pinMode(SD_CS_PIN, OUTPUT);
@@ -53,26 +70,45 @@ void setup() {
 	// Start the SD card
 	if (!SD.begin(SD_CS_PIN)) {
 		// The card is not present
+                #ifdef DEBUG
 		Serial.print("\n\r");
 		Serial.print("Error: No SD Card Detected\n\r");
+                #endif
+                digitalWrite(ERR_PIN, HIGH);
 		return;
 	}
-//	Serial.print("Completed\n\r");
+	Serial.print("Completed\n\r");
+
+//Here we create a new file each time we start up
+//char filename[] = "LOGGER00.CSV";
+for (uint8_t i=0; i< 100; i++) {
+  filename[6] = i/10 + '0';
+  filename[7] = i%10 + '0';
+  if (! SD.exists(filename)) {
+    // open a new file if none exists
+    dataFile = SD.open(filename, FILE_WRITE);
+    break;
+  }
+}
 
 	// Open the file to write the data to
-//	Serial.print("Opening the data file...");
-	dataFile = SD.open(FILE_NAME, FILE_WRITE);
+	Serial.print("Opening the data file...");
+	dataFile = SD.open(filename, FILE_WRITE);
 	if (!dataFile) {
 		// Error opening the file
+                #ifdef DEBUG
 		Serial.print("\n\r");
 		Serial.print("Error: Could not open ");
-		Serial.print(FILE_NAME);
+		Serial.print(filename);
+                #endif
+                digitalWrite(ERR_PIN, HIGH);
 		return;
 	}
-//	Serial.print("Opened ");
-//	Serial.print(FILE_NAME);
-//	Serial.print("\n\r");
-
+        #ifdef DEBUG
+	Serial.print("Opened ");
+	Serial.print(filename);
+	Serial.print("\n\r");
+        #endif
 	// Print headers into the file
 	dataFile.print("Time, Lat, Long, Alt, Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
 
@@ -101,7 +137,7 @@ void loop() {
 	allData = gasSensor->readAllData();
 
 	// Open the log file
-	dataFile = SD.open(FILE_NAME, FILE_WRITE);
+	dataFile = SD.open(filename, FILE_WRITE);
 	
 	// If the log file exists, write the data to it
 	if (dataFile) {
@@ -137,7 +173,8 @@ void loop() {
 	}
 
 	// Print the data to the computer terminal as well
-/*	Serial.print("\n\r");
+        #ifdef DEBUG
+	Serial.print("\n\r");
 	Serial.print(allData.temperature);
 	Serial.print(",");
 	Serial.print(allData.channel0);
@@ -158,7 +195,8 @@ void loop() {
 	Serial.print("\n");
 
 	Serial.print("Completed\n\r");
-*/
+        #endif
+
 	// Toggle the LED to indicate the read is finished
 	digitalWrite(LED_PIN, LOW);
 
