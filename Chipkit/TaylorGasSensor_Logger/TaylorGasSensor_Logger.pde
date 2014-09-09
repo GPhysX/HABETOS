@@ -1,5 +1,15 @@
+//Gas Sensor Logger
+//Code for polling information from the gas sensor by University of Florida and University of North Dakato
+//Initial code by Ian McInerney
+//Some edits by Matthew Nelson
+
+//Revision
+//Added some basic debug code
+//Modified code for when we removed the GPS hardware
+//Added Error LED indicator
+
 #include <SD.h>
-#include <lea6.h>
+//#include <lea6.h>  //Removed GPS code
 #include <SoftSPI.h>
 #include <TaylorGasSensor.h>
 
@@ -8,7 +18,7 @@
 #define SD_DEFAULT_CS_PIN	10
 
 //Define a Debug mode, comment out this line if you wish to turn debug off
-//#define DEBUG
+#define DEBUG
 
 // The LED pin
 #define LED_PIN		13
@@ -23,8 +33,8 @@
 // The filename of the datafile
 //#define FILE_NAME "data.csv"
 
-// The GPS object
-LEA6 *gps;
+// The GPS object - Removed GPS hardware
+//LEA6 *gps;
 
 // The gas sensor object
 TaylorGasSensor *gasSensor;
@@ -50,9 +60,9 @@ void setup() {
         
         digitalWrite(ERR_PIN, LOW);
 
-	// Initialize the GPS
-	gps = new LEA6(&Serial);
-	gps->init();
+	// Initialize the GPS - Removed GPS hardware
+	//gps = new LEA6(&Serial);
+	//gps->init();
 	
 	Serial.print("Initializing Gas Sensor...");
 	gasSensor = new TaylorGasSensor(CS_PIN, MOSI_PIN, MISO_PIN, SCK_PIN);
@@ -110,7 +120,9 @@ for (uint8_t i=0; i< 100; i++) {
 	Serial.print("\n\r");
         #endif
 	// Print headers into the file
-	dataFile.print("Time, Lat, Long, Alt, Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
+        // Edited since we removed the GPS hardware
+	//dataFile.print("Time, Lat, Long, Alt, Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
+        dataFile.print("Temp (K), Channel 0, Channel 1, Channel 2, Channel 3, Channel 4, Channel 5, Channel 6, Channel 7\n");
 
 	// Close the file to write the data to it
 	dataFile.close();
@@ -121,14 +133,14 @@ void loop() {
 	TaylorGasSensor::channelData_t allData;
 
 	// The data structure to hold the GPS data
-	LEA6::ubloxData_t gpsData;
+	//LEA6::ubloxData_t gpsData;
 
 	// Wait for the GPS to provide data
-	while (!(gps->readGPS())) {
-	}
-	gpsData = gps->getPositionInfo();
+	//while (!(gps->readGPS())) {
+	//}
+	//gpsData = gps->getPositionInfo();
 
-//	Serial.print("Taking a reading...");
+	Serial.print("Taking a reading...");
 
 	// Toggle the LED to indicate the read is in progress
 	digitalWrite(LED_PIN, HIGH);
@@ -141,14 +153,14 @@ void loop() {
 	
 	// If the log file exists, write the data to it
 	if (dataFile) {
-		dataFile.print(gpsData.time);
-		dataFile.print(",");
-		dataFile.print(gpsData.latitude);
-		dataFile.print(",");
-		dataFile.print(gpsData.longitude);
-		dataFile.print(",");
-		dataFile.print(gpsData.altitude);
-		dataFile.print(",");
+		//dataFile.print(gpsData.time);
+		//dataFile.print(",");
+		//dataFile.print(gpsData.latitude);
+		//dataFile.print(",");
+		//dataFile.print(gpsData.longitude);
+		//dataFile.print(",");
+		//dataFile.print(gpsData.altitude);
+		//dataFile.print(",");
 		dataFile.print(allData.temperature);
 		dataFile.print(",");
 		dataFile.print(allData.channel0);
