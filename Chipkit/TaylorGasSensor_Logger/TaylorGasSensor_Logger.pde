@@ -213,5 +213,5 @@ void loop() {
 	digitalWrite(LED_PIN, LOW);
 
 	// Delay for 1 second before performing the next reading
-//	delay(1000);
+	delay(250);
 }
