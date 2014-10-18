@@ -42,8 +42,10 @@ public:
 	/**
 	 * Function to perform initial configuration for the uBlox GPS.
 	 * It will open the serial port to be 38400BPS, and then configure the UBlox GPS to output only GGA and RMC NMEA strings on its UART1 port
+	 *
+	 * @return 0 if the port is configured correctly, 1 if the serial wires are swapped
 	 */
-	void init();
+	uint8_t init();
 	
 	/**
 	 * Function to poll the GPS and then parse the returned data into the GPS data structure.
@@ -60,8 +62,24 @@ public:
 	 * @return A copy of the ubloxData_t object with the most recent GPS data
 	 */
 	ubloxData_t getPositionInfo();
-	
+
+	/**
+	 * Function to set the delimiter for the ASCII string data
+	 *
+	 * @param The single ASCII character to use as the delimiter
+	 */
+	void setStringDelimiter(char *newDelimiter);
+
+	/**
+	 * Function to retrieve the current GPS data as an ASCII string
+	 *
+	 * @param positionString Pointer to a character array to store the generated string in
+	 * @return The length of the string, or 0 if there is an error
+	 */
+	uint8_t getPositionString(char *positionString);
+
 private:
+	char delimiter[1];				// The delimiter to use in the ASCII data string
 	TinyGPS parser;					// TinyGPS library object used to parse the GPS data received
 	ubloxData_t info;				// Position information from the uBlox
 	unsigned long lastTime;			// The timestamp of the last GPS packet received
